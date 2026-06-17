@@ -1,0 +1,77 @@
+// firestore.rules
+// Deploy with: firebase deploy --only firestore:rules
+// Or paste into Firebase Console → Firestore → Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function inGroup(groupId) {
+      return isAuthed() && getUserData().groupId == groupId;
+    }
+
+    // ── Users collection ──────────────────────────────────────────
+    // Users can only read/write their own document
+    match /users/{uid} {
+      allow read:   if isAuthed() && isOwner(uid);
+      allow create: if isAuthed() && isOwner(uid);
+      allow update: if isAuthed() && isOwner(uid);
+      allow delete: if false;   // never delete user docs via client
+    }
+
+    // ── Groups collection ─────────────────────────────────────────
+    // Any authenticated member of the group can read; only members can update
+    match /groups/{groupId} {
+      allow read:   if inGroup(groupId);
+      allow create: if isAuthed();
+      allow update: if inGroup(groupId);
+      allow delete: if false;
+    }
+
+    // ── Routines collection ───────────────────────────────────────
+    // Any group member can read, create, update, or delete routines
+    match /routines/{routineId} {
+      allow read:   if isAuthed() && inGroup(resource.data.groupId);
+      allow create: if isAuthed()
+                    && inGroup(request.resource.data.groupId)
+                    && request.resource.data.keys().hasAll(['taskName', 'date', 'isCompleted', 'assignedTo', 'groupId']);
+      allow update: if isAuthed() && inGroup(resource.data.groupId);
+      allow delete: if isAuthed() && inGroup(resource.data.groupId);
+    }
+
+    // ── Health Logs collection ────────────────────────────────────
+    // Each user can only read and write their own health data
+    match /healthLogs/{logId} {
+      allow read:   if isAuthed() && isOwner(resource.data.userId);
+      allow create: if isAuthed()
+                    && isOwner(request.resource.data.userId)
+                    && request.resource.data.keys().hasAll(['userId', 'date', 'type']);
+      allow update: if isAuthed() && isOwner(resource.data.userId);
+      allow delete: if isAuthed() && isOwner(resource.data.userId);
+    }
+
+    // ── Expenses collection ───────────────────────────────────────
+    // Any authenticated group member can view and create expenses.
+    match /expenses/{expenseId} {
+      allow read:   if isAuthed() && inGroup(resource.data.groupId);
+      allow create: if isAuthed()
+                    && inGroup(request.resource.data.groupId)
+                    && request.resource.data.keys().hasAll(['groupId', 'date', 'amount', 'createdAt']);
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

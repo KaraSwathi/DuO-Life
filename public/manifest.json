@@ -1,0 +1,43 @@
+{
+  "name": "DuoLife – Shared Daily Tracker",
+  "short_name": "DuoLife",
+  "description": "Track daily routines, health, and expenses together.",
+  "theme_color": "#6C63FF",
+  "background_color": "#0F0F1A",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "categories": ["health", "lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Routines",
+      "short_name": "Routines",
+      "description": "Check off today's routines",
+      "url": "/routines",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Log Meal",
+      "short_name": "Meals",
+      "description": "Log a meal quickly",
+      "url": "/health",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

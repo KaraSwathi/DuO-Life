@@ -1,0 +1,32 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "routines",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "groupId",      "order": "ASCENDING" },
+        { "fieldPath": "date",         "order": "ASCENDING" },
+        { "fieldPath": "isCompleted",  "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "healthLogs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "date",   "order": "ASCENDING" },
+        { "fieldPath": "type",   "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "expenses",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "groupId",   "order": "ASCENDING" },
+        { "fieldPath": "date",      "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
