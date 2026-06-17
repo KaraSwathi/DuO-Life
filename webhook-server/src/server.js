@@ -23,17 +23,22 @@ function loadServiceAccountCredentials() {
       // fall through to the explicit error below
     }
 
-    throw new Error(
-      'Invalid FIREBASE_SERVICE_ACCOUNT_JSON. Use a raw service-account JSON string or set FIREBASE_SERVICE_ACCOUNT_JSON_B64.',
-    )
+    console.warn('Invalid FIREBASE_SERVICE_ACCOUNT_JSON value: not JSON or not base64-encoded JSON. Continuing without service-account credentials.')
+    return null
   }
 
   if (rawBase64) {
     const decoded = Buffer.from(rawBase64, 'base64').toString('utf8').trim()
     if (!decoded.startsWith('{')) {
-      throw new Error('Invalid FIREBASE_SERVICE_ACCOUNT_JSON_B64. Expected base64-encoded service-account JSON.')
+      console.warn('Invalid FIREBASE_SERVICE_ACCOUNT_JSON_B64: decoded value is not JSON. Continuing without service-account credentials.')
+      return null
     }
-    return JSON.parse(decoded)
+    try {
+      return JSON.parse(decoded)
+    } catch (e) {
+      console.warn('Failed to parse decoded FIREBASE_SERVICE_ACCOUNT_JSON_B64 as JSON:', e.message)
+      return null
+    }
   }
 
   return null

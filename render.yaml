@@ -9,5 +9,7 @@ services:
     healthCheckPath: /health
     autoDeploy: true
     envVars:
+      - key: WEBHOOK_TOKEN
+        generateValue: true
       - key: FIREBASE_SERVICE_ACCOUNT_JSON_B64
         sync: false
