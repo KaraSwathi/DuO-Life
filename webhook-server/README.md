@@ -20,6 +20,7 @@ Set these before running:
 - `WEBHOOK_TOKEN` (required): shared secret used by Tasker and webhook
 - `GOOGLE_APPLICATION_CREDENTIALS` (recommended): path to Firebase service account JSON file
 - OR `FIREBASE_SERVICE_ACCOUNT_JSON`: full JSON string of service account
+- OR `FIREBASE_SERVICE_ACCOUNT_JSON_B64`: base64-encoded service account JSON
 - `PORT` (optional): defaults to `8787`
 
 ## 3) Run locally
@@ -101,7 +102,7 @@ This repo includes `render.yaml` at the project root.
 3. Select your repository and create services from `render.yaml`.
 4. Open the created service and set env vars:
    - `WEBHOOK_TOKEN`: your own strong secret (override generated value if needed)
-   - `FIREBASE_SERVICE_ACCOUNT_JSON`: full Firebase service account JSON (single-line JSON string)
+  - `FIREBASE_SERVICE_ACCOUNT_JSON_B64`: base64-encoded Firebase service account JSON
 5. Deploy, then copy your Render URL.
 
 Webhook URL format:
@@ -138,3 +139,14 @@ Expected response:
   "category": "shopping"
 }
 ```
+
+### Convert the Firebase service account JSON to base64
+
+PowerShell:
+
+```powershell
+$json = Get-Content .\serviceAccountKey.json -Raw
+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($json))
+```
+
+Paste the output into `FIREBASE_SERVICE_ACCOUNT_JSON_B64`.

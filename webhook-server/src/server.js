@@ -5,14 +5,51 @@ import { parseTaskerExpensePayload } from './parser.js'
 const PORT = Number(process.env.PORT || 8787)
 const WEBHOOK_TOKEN = String(process.env.WEBHOOK_TOKEN || '').trim()
 
-if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && !process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-  console.warn('Missing Firebase credentials. Set GOOGLE_APPLICATION_CREDENTIALS or FIREBASE_SERVICE_ACCOUNT_JSON.')
+function loadServiceAccountCredentials() {
+  const rawJson = String(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '').trim()
+  const rawBase64 = String(process.env.FIREBASE_SERVICE_ACCOUNT_JSON_B64 || '').trim()
+
+  if (rawJson) {
+    if (rawJson.startsWith('{')) {
+      return JSON.parse(rawJson)
+    }
+
+    try {
+      const decoded = Buffer.from(rawJson, 'base64').toString('utf8').trim()
+      if (decoded.startsWith('{')) {
+        return JSON.parse(decoded)
+      }
+    } catch {
+      // fall through to the explicit error below
+    }
+
+    throw new Error(
+      'Invalid FIREBASE_SERVICE_ACCOUNT_JSON. Use a raw service-account JSON string or set FIREBASE_SERVICE_ACCOUNT_JSON_B64.',
+    )
+  }
+
+  if (rawBase64) {
+    const decoded = Buffer.from(rawBase64, 'base64').toString('utf8').trim()
+    if (!decoded.startsWith('{')) {
+      throw new Error('Invalid FIREBASE_SERVICE_ACCOUNT_JSON_B64. Expected base64-encoded service-account JSON.')
+    }
+    return JSON.parse(decoded)
+  }
+
+  return null
+}
+
+if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && !process.env.FIREBASE_SERVICE_ACCOUNT_JSON && !process.env.FIREBASE_SERVICE_ACCOUNT_JSON_B64) {
+  console.warn('Missing Firebase credentials. Set GOOGLE_APPLICATION_CREDENTIALS, FIREBASE_SERVICE_ACCOUNT_JSON, or FIREBASE_SERVICE_ACCOUNT_JSON_B64.')
 }
 
 if (!admin.apps.length) {
-  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-    const credentials = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON)
+  const credentials = loadServiceAccountCredentials()
+
+  if (credentials) {
     admin.initializeApp({ credential: admin.credential.cert(credentials) })
+  } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    admin.initializeApp({ credential: admin.credential.applicationDefault() })
   } else {
     admin.initializeApp()
   }

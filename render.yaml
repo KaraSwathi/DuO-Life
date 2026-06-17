@@ -9,9 +9,5 @@ services:
     healthCheckPath: /health
     autoDeploy: true
     envVars:
-      - key: Node.js v20.20.2
-        value: "20"
-      - key: duo_acc_72341824ss2004
-        generateValue: true
-      - key: 12345a6789b101112131415c
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON_B64
         sync: false
